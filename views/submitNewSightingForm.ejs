@@ -51,11 +51,26 @@
           <form action="/newSighting" id="submitNewForm" method="POST">
             <div class="form-group">
               <label for="description">Description*:</label>
-              <input type="text" class="form-control <%
-              if(feedback.description!=="ok"){ %> is-invalid <% } else { %>
-              is-valid <% } %>" id="text" placeholder="Enter Description"
-              name="description"<% if(locals.description){ %> value= "<%=description%>" <% } %>  required /> <% if(feedback.description){ %>
-              <div class="invalid-feedback"><%= feedback.description%></div>
+              <input type="text" class="form-control 
+              <%if(locals.feedback){%>
+              <%if(feedback.description!=="ok"){ %>
+                is-invalid 
+              <% } else { %>
+                is-valid 
+              <% } %>
+              <% } %>" 
+              id="text" 
+              placeholder="Enter Description"
+              name="description"
+
+              <% if(locals.description){ %> 
+                value= "<%=description%>" 
+                <% } %>  required 
+                /> 
+              <%if(locals.feedback){%>
+                <% if(feedback.description){ %>
+                <div class="invalid-feedback"><%= feedback.description%></div>
+                <% } %>
               <% } %>
               <small id="vividDescription" class="form-text text-muted"
                 >Please enter your sighting as vividly as possible!</small
@@ -104,12 +119,22 @@
             </div>
             <div class="form-group">
               <label for="shape">Shape*:</label>
-              <input type="text" class="form-control <% if(feedback.shape !==
-              "ok"){ %> is-invalid <% } else { %> is-valid <% } %> "id="shape"
-              placeholder="E.g Spherical" name="shape" required /> <%
-              if(feedback.shape){ %>
-              <div class="invalid-feedback"><%= feedback.shape%></div>
-              <% } %>
+              <input type="text" class="form-control 
+              <%if(locals.feedback){%>
+              <% if(feedback.shape !=="ok"){ %>
+                 is-invalid 
+              <% } else { %> 
+                  is-valid 
+              <% } %>    
+              <% } %>"
+                  id="shape"
+                  placeholder="E.g Spherical" name="shape" 
+                  required /> 
+                  <%if(locals.feedback){%>
+                      <%if(feedback.shape){ %>
+                        <div class="invalid-feedback"><%= feedback.shape%></div>
+                      <% } %>
+                  <% } %>
             </div>
             <div class="form-group">
               <label for="duration">Duration:</label>
