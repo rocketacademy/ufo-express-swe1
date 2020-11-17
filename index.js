@@ -1,7 +1,7 @@
 import methodOverride from 'method-override';
 import express from 'express';
 import {
-  read, add, deleteContent, write,
+  read, add, deleteContent, edit,
 } from './jsonFileStorage.js';
 
 const app = express();
@@ -23,63 +23,108 @@ const convertToIterableObj = (nonIterableObj) => {
   return newObj;
 };
 
-// Homepage - Shows all sightings
+// Helper Function that checks the inputs for validation
+const performValidationOnRequestBody = (requestBodyObj, callback) => {
+  const inputValidationFeedbackObj = {};
+  let isFormValid = true;
+  const {
+    _, description, date_time, city, state, shape, duration, summary, __,
+  } = requestBodyObj;
+
+  if (description.length < 10) {
+    inputValidationFeedbackObj.description = 'Description is too short!';
+    isFormValid = false;
+  } else {
+    inputValidationFeedbackObj.description = 'ok';
+  }
+
+  if (shape.toLowerCase() !== 'sphere' && shape.toLowerCase() !== 'circle') {
+    inputValidationFeedbackObj.shape = 'Shape is not valid.';
+    isFormValid = false;
+  } else {
+    inputValidationFeedbackObj.shape = 'ok';
+  }
+  callback(inputValidationFeedbackObj, isFormValid);
+};
+
+// Homepage - Shows all sightings, sortable by ID
 app.get('/', (request, response) => {
-  read(FILENAME, (data) => {
+  const orderOfSort = request.query.sortOrder;
+  read(FILENAME, (data, error) => {
+    if (error) {
+      response.sendStatus(500, error);
+      return;
+    }
+    data.sightings.sort((a, b) => {
+      if (orderOfSort === 'ascending') {
+        return a.id - b.id;
+      } if (orderOfSort === 'descending') {
+        return b.id - a.id;
+      }
+      return a.id - b.id;
+    });
     response.render('sightings', data);
   });
 });
 
 // Create form to input sighting
 app.get('/newSighting', (request, response) => {
-  read(FILENAME, (data) => {
+  read(FILENAME, (data, error) => {
+    if (error) {
+      response.sendStatus(500, error);
+      return;
+    }
     response.render('submitNewSightingForm', data);
   });
 });
 
 // Create a POST method / submit new sighting
-// Param - filename, key, input, callback)
+// Params - filename, key, input, callback)
 app.post('/newSighting', (request, response) => {
   const requestBodyObj = convertToIterableObj(request.body);
-  // Read file to append a number tag to each sighting
-  read(FILENAME, (data) => {
-    const newSighting = { number: Number(data.sightings.length) + 1, ...requestBodyObj };
-    console.log(newSighting, 'posting');
-    add(FILENAME, 'sightings', newSighting, (data) => {
+  // Perform input validation first
+
+  performValidationOnRequestBody(requestBodyObj, (feedbackMsg, isFormValid) => {
+    if (isFormValid === false) {
+      request.body.feedback = feedbackMsg;
+      console.log(request.body);
+      response.render('submitNewSightingForm', request.body);
+    }
+  });
+
+  add(FILENAME, 'sightings', requestBodyObj, (data, error) => {
     // to be redirected to sighting/<index>
-      response.redirect(`/sighting/${data.sightings.length}`);
-    });
+    response.redirect(`/sighting/${data.sightings.length}`);
   });
 });
 
 // Render a particular sighting
-app.get('/sighting/:index', (request, response) => {
-  const { index: number } = request.params;
-  console.log(number, 'number');
+app.get('/sighting/:id', (request, response) => {
+  const { id } = request.params;
   read(FILENAME, (data) => {
-    const sightingData = data.sightings[number - 1];
+    const sightingData = data.sightings[id - 1];
     response.render('sighting', sightingData);
   });
 });
 
 // Render a form to edit a sighting
-app.get('/sighting/:index/edit', (request, response) => {
-  const { index: number } = request.params;
+app.get('/sighting/:id/edit', (request, response) => {
+  const { id } = request.params;
   read(FILENAME, (data) => {
-    const sightingData = data.sightings[number - 1];
+    const sightingData = data.sightings[id - 1];
     response.render('sightingFormEdit', sightingData);
   });
 });
 
 // Edit the sighting
-app.put('/sighting/:index/edit', (request, response) => {
-  const { index: indexNum } = request.params;
+app.put('/sighting/:id/edit', (request, response) => {
+  const { id } = request.params;
   const requestBodyObj = convertToIterableObj(request.body);
-  read(FILENAME, (data) => {
-    const editedSightingObj = { number: indexNum, ...requestBodyObj };
-    data.sightings[indexNum - 1] = editedSightingObj;
-
-    write(FILENAME, data);
+  edit(FILENAME, id, requestBodyObj, (data, error) => {
+    if (error) {
+      response.sendStatus(500, 'error');
+      return;
+    }
     response.redirect('/');
   });
 });
@@ -104,9 +149,9 @@ app.get('/shapes/:shape', (request, response) => {
 });
 
 // Accept a request to delete a sighting
-app.delete('/sighting/:index/', (request, response) => {
-  const { index } = request.params;
-  deleteContent(FILENAME, index, () => {
+app.delete('/sighting/:id/', (request, response) => {
+  const { id } = request.params;
+  deleteContent(FILENAME, id, () => {
     console.log('deleting sighting now');
     response.redirect('/');
   });

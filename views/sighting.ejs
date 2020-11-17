@@ -10,11 +10,22 @@
   <link rel="stylesheet" href="/styles.css" />
 
   <!--NavBar-->
-  <nav class="navbar navbar-expand-sm fixed-top bg-light">
+  <nav class="navbar navbar-expand-sm fixed-top navbar-light navBarBg">
     <a class="navbar-brand">UFO Sightings!</a>
-    <div>
+
+    <!-- Toggler/collapsibe Button -->
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#collapsibleNavbar"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <!-- Navbar links -->
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
       <ul class="navbar-nav">
-        <li class="nav-item">
+        <li class="nav-item active">
           <a class="nav-link" href="/">Home</a>
         </li>
         <li class="nav-item">
@@ -28,29 +39,40 @@
   </nav>
 
   <body>
-    <div class="container navTopMargin">
-      <div class="pageTitle">Sighting in <%=city%></div>
-      <div class="container">
-        <div class="row"><b>Description:</b> <%=description%></div>
-        <div class="row"><b>Date & Time:</b> <%=date_time%></div>
-        <div class="row"><b>City:</b> <%=city%></div>
-        <div class="row"><b>State:</b> <%=state%></div>
-        <div class="row"><b>Shape:</b> <%=shape%></div>
-        <div class="row"><b>Duration:</b> <%=duration%></div>
-        <div class="row"><b>Summary:</b> <%=summary%></div>
-        <div>
-          <a
-            href="/sighting/<%=number%>/edit"
-            class="btn btn-primary"
-            role="button"
-          >
+    <div class="pageTitle navTopMargin">Sighting in <%=city%></div>
+    <div class="container mt-3 sightingContainer">
+      <div class="row pt-3 pl-3"><b>Description:</b></div>
+      <div class="row pl-3"><%=description%></div>
+
+      <div class="row pt-3 pl-3"><b>Date & Time:</b></div>
+      <div class="row pl-3"><%=date_time%></div>
+
+      <div class="row pt-3 pl-3"><b>City:</b></div>
+      <div class="row pl-3"><%=city%></div>
+
+      <div class="row pt-3 pl-3"><b>State:</b></div>
+      <div class="row pl-3"><%=state%></div>
+
+      <div class="row pt-3 pl-3"><b>Shape:</b></div>
+      <div class="row pl-3"><%=shape%></div>
+
+      <div class="row pt-3 pl-3"><b>Duration:</b></div>
+      <div class="row pl-3"><%=duration%></div>
+
+      <div class="row pt-3 pl-3"><b>Summary:</b></div>
+      <div class="row pl-3"><%=summary%></div>
+
+      <div class="row mt-3 pb-4 d-flex justify-content-center">
+        <div class="col-sm-1">
+          <a href="/sighting/<%=id%>/edit" class="btn btn-info" role="button">
             Edit</a
           >
-          <form action="/sighting/<%=number%>?_method=DELETE" method="POST">
-            <input type="hidden" name="_method" value="DELETE" />
+        </div>
+        <div class="col-sm-1">
+          <form action="/sighting/<%=id%>?_method=DELETE" method="POST">
             <input
               type="submit"
-              class="btn btn-primary"
+              class="btn btn-danger"
               name="_method"
               value="Delete"
             />

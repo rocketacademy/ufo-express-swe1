@@ -18,3 +18,25 @@
   font-size: 30px;
   font-weight: bold;
 }
+
+.sightingContainer {
+  background-color: lightyellow;
+  border-radius: 5px;
+}
+
+.btnHeight {
+  height: 40px;
+  margin: 5px;
+}
+
+.navBarBg {
+  background-color: #e3f2fd;
+}
+
+.shapeBgColor {
+  background-color: silver;
+}
+
+.warningMsg{
+  color: rgb(189, 36, 36);
+}

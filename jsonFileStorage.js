@@ -5,6 +5,7 @@ export function read(filename, callback) {
     // check for reading errors
     if (error) {
       console.log('reading error', error);
+      callback(null, error);
       return;
     }
 
@@ -28,12 +29,10 @@ export function write(filename, content, callback) {
   writeFile(filename, outputContent, (writingError) => {
     if (writingError) {
       console.log('error writing', writingError);
+      callback(writingError);
     } else {
       // file written successfully
       console.log('success!');
-      if (callback) {
-        callback();
-      }
     }
   });
 }
@@ -62,8 +61,12 @@ export function add(filename, key, input, callback) {
       callback(null, errorMessage);
       return;
     }
+    // Add timestamp
+    const timeStamp = getTimeStamp();
+    // Input ID to new obj that is to be appended towards the end
+    const inputWithID = { id: Number(content.sightings.length) + 1, ...input, timeSubmitted: timeStamp };
 
-    content[key].push(input);
+    content[key].push(inputWithID);
 
     // turn it into a string
     const outputContent = JSON.stringify(content);
@@ -84,15 +87,18 @@ export function add(filename, key, input, callback) {
   readFile(filename, 'utf-8', whenFileIsRead);
 }
 
-export function edit(filename, index, newInput, callback) {
+export function edit(filename, id, newInput, callback) {
   const editItem = (data, error) => {
     if (error) {
+      console.log('error', error);
       callback(error);
+      return;
     }
-    console.log(index, 'index');
-    data.sightings[index - 1] = newInput;
-    console.log(data.sightings[index - 1], 'new Data');
-    console.log(data, 'data');
+    // Add timestamp
+    const timeStamp = getTimeStamp();
+    // Input ID to new obj that is to be appended at the same position
+    const inputWithID = { id: Number(id), ...newInput, timeSubmitted: timeStamp };
+    data.sightings[id - 1] = inputWithID;
     callback(data);
     write(filename, data);
   };
@@ -107,9 +113,20 @@ export function deleteContent(filename, index, callback) {
       callback(data);
     }
     data.sightings.forEach((sighting, arrayIndex) => {
-      sighting.number = arrayIndex + 1;
+      sighting.id = arrayIndex + 1;
     });
     write(filename, data);
   };
   read(filename, deleteItem);
 }
+
+// Helper Function that creates a timestamp when an item is edited or created
+const getTimeStamp = () => {
+  // Input time of submission
+  const newSubmission = new Date();
+  const timeStamp = newSubmission.toLocaleString('en-AU', {
+    day: '2-digit', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit',
+  });
+  console.log(timeStamp);
+  return timeStamp;
+};
