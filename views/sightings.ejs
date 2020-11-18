@@ -84,14 +84,14 @@
         <th>
         <a
           href="/sighting/<%=sighting.id%>"
-          class="btn btn-primary btn-md btnHeight"
+          class="btn btn-info btn-md btnHeight"
           role="button"
         >
           View</a
         >
         <a
           href="/sighting/<%=sighting.id%>/edit"
-          class="btn btn-primary btn-md btnHeight"
+          class="btn btn-warning btn-md btnHeight"
           role="button"
         >
           Edit</a
@@ -99,7 +99,7 @@
         <form action="/sighting/<%=sighting.id%>?_method=DELETE" method="POST">
           <input
             type="submit"
-            class="btn btn-primary btn-md btnHeight"
+            class="btn btn-danger btn-md btnHeight"
             name="_method"
             value="Delete"
           />

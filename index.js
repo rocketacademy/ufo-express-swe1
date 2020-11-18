@@ -31,7 +31,7 @@ const performValidationOnRequestBody = (requestBodyObj, callback) => {
     _, description, date_time, city, state, shape, duration, summary, __,
   } = requestBodyObj;
 
-  if (description.length < 10) {
+  if (description.length < 5) {
     inputValidationFeedbackObj.description = 'Description is too short!';
     isFormValid = false;
   } else {
@@ -82,15 +82,21 @@ app.get('/newSighting', (request, response) => {
 // Params - filename, key, input, callback)
 app.post('/newSighting', (request, response) => {
   const requestBodyObj = convertToIterableObj(request.body);
-  // Perform input validation first
+  // locally scoped boolean to track if current form is valid
+  let isThisFormValid = true;
 
-  performValidationOnRequestBody(requestBodyObj, (feedbackMsg, isFormValid) => {
-    if (isFormValid === false) {
+  // Perform input validation first
+  performValidationOnRequestBody(requestBodyObj, (feedbackMsg, areFieldsValid) => {
+    if (areFieldsValid === false) {
       request.body.feedback = feedbackMsg;
+      isThisFormValid = false;
       console.log(request.body);
       response.render('submitNewSightingForm', request.body);
     }
   });
+  if (isThisFormValid === false) {
+    return;
+  }
 
   add(FILENAME, 'sightings', requestBodyObj, (data, error) => {
     // to be redirected to sighting/<index>
@@ -120,12 +126,29 @@ app.get('/sighting/:id/edit', (request, response) => {
 app.put('/sighting/:id/edit', (request, response) => {
   const { id } = request.params;
   const requestBodyObj = convertToIterableObj(request.body);
+
+  // locally scoped boolean to track if current form is valid
+  let isThisFormValid = true;
+
+  // Perform input validation first
+  performValidationOnRequestBody(requestBodyObj, (feedbackMsg, areFieldsValid) => {
+    if (areFieldsValid === false) {
+      request.body.feedback = feedbackMsg;
+      request.body.id = id;
+      console.log(request.body);
+      isThisFormValid = false;
+      response.render('sightingFormEdit', request.body);
+    }
+  });
+  if (isThisFormValid === false) {
+    return;
+  }
   edit(FILENAME, id, requestBodyObj, (data, error) => {
     if (error) {
       response.sendStatus(500, 'error');
       return;
     }
-    response.redirect('/');
+    response.redirect(`/sighting/${data.sightings.length}`);
   });
 });
 

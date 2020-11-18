@@ -45,15 +45,28 @@
         <div class="col-12 d-flex justify-content-center">
           <form action="/sighting/<%=id%>/edit?_method=PUT" method="POST">
             <div class="form-group">
-              <label for="description">Description:</label>
+              <label for="description">Description*:</label>
               <input
                 type="text"
-                class="form-control"
+                class="form-control
+              <%if(locals.feedback){%>
+              <%if(feedback.description!=="ok"){ %>
+                is-invalid 
+              <% } else { %>
+                is-valid 
+              <% } %>
+              <% } %>                                            
+                "
                 id="text"
                 placeholder="Enter Description"
                 name="description"
                 value="<%=description%>"
               />
+               <%if(locals.feedback){%>
+                <% if(feedback.description){ %>
+                <div class="invalid-feedback"><%= feedback.description%></div>
+                <% } %>
+              <% } %>
               <small id="vividDescription" class="form-text text-muted"
                 >Please enter your sighting as vividly as possible!</small
               >
@@ -70,7 +83,7 @@
               />
             </div>
             <div class="form-group">
-              <label for="city">City:</label>
+              <label for="city">City*:</label>
               <input
                 type="text"
                 class="form-control"
@@ -92,15 +105,27 @@
               />
             </div>
             <div class="form-group">
-              <label for="shape">Shape:</label>
+              <label for="shape">Shape*:</label>
               <input
                 type="text"
-                class="form-control"
+                class="form-control
+                <%if(locals.feedback){%>
+                <% if(feedback.shape !=="ok"){ %>
+                 is-invalid 
+                <% } else { %> 
+                  is-valid 
+                <% } %>    
+                <% } %>"
                 id="shape"
                 placeholder="E.g Spherical"
                 name="shape"
                 value="<%=shape%>"
               />
+              <%if(locals.feedback){%>
+                      <%if(feedback.shape){ %>
+                        <div class="invalid-feedback"><%= feedback.shape%></div>
+                      <% } %>
+                  <% } %>
             </div>
             <div class="form-group">
               <label for="duration">Duration:</label>
