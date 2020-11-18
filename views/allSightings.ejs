@@ -18,10 +18,6 @@
   </head>
   <body>
     <h4 class="h4 text-center mt-2 mb-3">List of Sightings</h4>
-
-    <!--
-      header, stripped, hoverable, filter, sort, delete button added, 
-    -->
     <div
       class="container table-responsive custom-scrollbar table-wrapper-scroll-y"
     >
@@ -38,7 +34,7 @@
             <% } else { %>
             <th scope="col"><%=headerVal%></th>
             <% } %> <%}) %>
-            <th scope="col">Delete</th>
+            <th scope="col">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -55,7 +51,18 @@
             <td><%=singleSighting[headerVal]%></td>
             <% } %> <%}) %>
             <td class="btn-col">
-              <button class="btn delete-btn">Delete</button>
+              <form action="/sighting/<%=index%>" method="GET">
+                <button class="btn view-btn">View</button>
+              </form>
+              <form action="/sighting/<%=index%>/edit" method="GET">
+                <button class="btn edit-btn">Edit</button>
+              </form>
+              <form
+                action="/sighting/<%=index%>/delete?_method=DELETE"
+                method="POST"
+              >
+                <button class="btn delete-btn">Delete</button>
+              </form>
             </td>
           </tr>
           <% }) %>

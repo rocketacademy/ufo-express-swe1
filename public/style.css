@@ -3,14 +3,6 @@ body {
   color: rgb(216, 238, 238);
 }
 
-/* .key-value-row {
-  border: lightblue 1px solid;
-}
-
-.key-val-col {
-  border: lightblue 1px solid;
-} */
-
 .sight-table {
   color: lightblue;
 }
@@ -48,7 +40,19 @@ body {
   background-color: rgb(46, 71, 87);
   color: aliceblue;
   font-size: 0.74rem;
-  margin-bottom: 0.1em;
+  line-height: 1;
+}
+
+.view-btn {
+  background-color: rgb(75, 101, 117);
+  color: aliceblue;
+  font-size: 0.74rem;
+}
+
+.edit-btn {
+  background-color: rgb(119, 153, 175);
+  color: aliceblue;
+  font-size: 0.74rem;
 }
 
 /*This is to adjust the cell width to the content*/

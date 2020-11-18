@@ -20,7 +20,7 @@ export function write(filename, content, callbackAfterWriteFn) {
   const whenFileIsWritten = (error) => {
     const message = (error) ? `Error occurred: ${error}` : 'Write success!';
     console.log(message);
-    callbackAfterWriteFn(outputContent, null);
+    callbackAfterWriteFn(null, error);
   };
   const outputContent = JSON.stringify(content);
   writeFile(filename, outputContent, whenFileIsWritten);
