@@ -67,7 +67,7 @@ app.get('/', (request, response) => {
       }
       return a.id - b.id;
     });
-    response.render('sightings', data);
+    response.render('allSightings', data);
   });
 });
 
@@ -101,10 +101,10 @@ app.post('/newSighting', (request, response) => {
   }
 
   /**
-   * @param{file} some file to be read
-   * @param{key} the key to access in the file to be added
-   * @param{input} in this case, it is the iterated requestBodyObj
-   * @param{callback} performs a callback after taking in the data and error vars from add fn
+   * @param {FILENAME} contains all the data of the sightings to be read
+   * @param {key} the key to access in the file to be added
+   * @param {input} in this case, it is the iterated requestBodyObj
+   * @param {callback} performs a callback after taking in the data and error vars from add fn
   */
   add(FILENAME, 'sightings', requestBodyObj, (data, error) => {
     // to be redirected to sighting/<index>
@@ -128,12 +128,11 @@ app.get('/sighting/:id/edit', (request, response) => {
   const { id } = request.params;
   read(FILENAME, (data) => {
     const sightingData = data.sightings[id - 1];
-    response.render('sightingFormEdit', sightingData);
+    response.render('editExistingSightingForm', sightingData);
   });
 });
 
 // Edit the sighting through a PUT method
-
 app.put('/sighting/:id/edit', (request, response) => {
   // id of sighting is not zero-indexed
   const { id } = request.params;
@@ -158,10 +157,10 @@ app.put('/sighting/:id/edit', (request, response) => {
     return;
   }
   /**
- * @param{file} some file to be read
- * @param{id} the corresponding id of the sighting
- * @param{input} in this case, it is the iteratable requestBodyObj
- * @param{callback} performs a callback after taking in the data and error vars from add fn
+ * @param {FILENAME} some file to be read
+ * @param {id} the corresponding id of the sighting
+ * @param {input} in this case, it is the iteratable requestBodyObj
+ * @param {callback} performs a callback after taking in the data and error vars from add fn
 */
   edit(FILENAME, id, requestBodyObj, (data, error) => {
     if (error) {
