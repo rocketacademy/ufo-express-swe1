@@ -44,6 +44,29 @@ const sendResponseSingleSighting = (singleSighting, error, response) => {
 };
 
 /**
+ *
+ * @param {*} listOfSightings
+ * @param {*} error - error code from file reading
+ * @param {*} response - to send HTTP response
+ *
+ * This function sends the response to the request to display all the sightings
+ * in the data file
+ */
+const sendResponseListAllSightings = (listOfSightings, error, response) => {
+  if (error)
+  {
+    response.status(500).send('Sorry, this didnt work!!');
+    return;
+  }
+  // This variable stores the keys, which will be displayed as header
+  const sightingsHeaderKeys = ['city', 'state', 'shape', 'duration', 'date_time', 'summary', 'text'];
+  response.render('allSightings', {
+    sightingsHeader: sightingsHeaderKeys,
+    sightingsList: listOfSightings,
+  });
+};
+
+/**
  * Export Functions
  */
 /**
@@ -85,5 +108,19 @@ export const handleSingleSightingDisplayReg = (request, response) => {
     const requestedIndex = request.params.index;
     console.log(`index: ${requestedIndex}`);
     sendResponseSingleSighting(jsonObjectData.sightings[requestedIndex], error, response);
+  });
+};
+
+/**
+ *
+ * @param {*} request - HTTP request
+ * @param {*} response - HTTP response
+ *
+ * Function that handles the request to display all the sightings present
+ * in the data json file
+ */
+export const handleAllSightingsDisplayReq = (request, response) => {
+  read(FILE_NAME, (jsonObjectData, error) => {
+    sendResponseListAllSightings(jsonObjectData.sightings, error, response);
   });
 };

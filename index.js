@@ -1,5 +1,8 @@
 import express from 'express';
-import { handleNewDataFormDisplayReq, handleAddNewSightingReq, handleSingleSightingDisplayReg } from './requestResponseHandler.js';
+import {
+  handleNewDataFormDisplayReq, handleAddNewSightingReq, handleSingleSightingDisplayReg,
+  handleAllSightingsDisplayReq,
+} from './requestResponseHandler.js';
 
 const PORT = 3004;
 
@@ -19,5 +22,7 @@ app.get('/sighting', handleNewDataFormDisplayReq);
 app.post('/sighting', handleAddNewSightingReq);
 // Render a single sighting.
 app.get('/sighting/:index', handleSingleSightingDisplayReg);
+// Render a list of Sightings
+app.get('/', handleAllSightingsDisplayReq);
 // listening in the port
 app.listen(PORT);
