@@ -40,3 +40,8 @@
 .warningMsg{
   color: rgb(189, 36, 36);
 }
+
+.form-group.required .control-label:after{
+  content: "*";
+  color:red;
+}

@@ -47,7 +47,7 @@ const performValidationOnRequestBody = (requestBodyObj, callback) => {
   callback(inputValidationFeedbackObj, isFormValid);
 };
 
-// Homepage - Shows all sightings, sortable by ID
+// Route: Homepage - Shows all sightings, sortable by ID
 app.get('/', (request, response) => {
   const orderOfSort = request.query.sortOrder;
   read(FILENAME, (data, error) => {
@@ -67,7 +67,7 @@ app.get('/', (request, response) => {
   });
 });
 
-// Create form to input sighting
+// Route: Create form to input sighting
 app.get('/newSighting', (request, response) => {
   read(FILENAME, (data, error) => {
     if (error) {
@@ -104,7 +104,7 @@ app.post('/newSighting', (request, response) => {
   });
 });
 
-// Render a particular sighting
+// Route: Render a particular sighting
 app.get('/sighting/:id', (request, response) => {
   const { id } = request.params;
   read(FILENAME, (data) => {
