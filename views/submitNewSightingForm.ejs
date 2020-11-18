@@ -51,6 +51,11 @@
           <form action="/newSighting" id="submitNewForm" method="POST">
             <div class="form-group required">
               <label class="control-label" for="description">Description:</label>
+              <!-- Request.body object will reflect a singular sighting object, with the keys that will be transformed into local 
+                variables e.g (description, date_time,shape etc) -->
+              <!--Feedback is a new local variable (obj) which reflects the server-side feedback if the form is valid or not -->
+              <!-- Hence, to check if fields are valid, we check if "feedback" local variable (obj) exists in the request.body object i.e "locals"-->
+              <!-- If present, if description value is not "ok" select is-invalid state -->
               <input type="text" class="form-control 
               <%if(locals.feedback){%>
               <%if(feedback.description!=="ok"){ %>
@@ -62,7 +67,6 @@
               id="text" 
               placeholder="Enter Description"
               name="description"
-
               <% if(locals.description){ %> 
                 value= "<%=description%>" 
                 <% } %>  required 
@@ -181,7 +185,6 @@
       </div>
     </div>
   </body>
-  <script src="submitNewFormDV.js"></script>
   <script
     src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
     integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"

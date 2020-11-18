@@ -89,6 +89,7 @@ export function add(filename, key, input, callback) {
 
 export function edit(filename, id, newInput, callback) {
   const editItem = (data, error) => {
+    // check for error
     if (error) {
       console.log('error', error);
       callback(error);
@@ -106,9 +107,16 @@ export function edit(filename, id, newInput, callback) {
   read(filename, editItem);
 }
 
-export function deleteContent(filename, index, callback) {
-  const deleteItem = (data) => {
-    data.sightings.splice(index - 1, 1);
+export function deleteContent(filename, id, callback) {
+  const deleteItem = (data, error) => {
+    // check for error
+    if (error) {
+      console.log('error', error);
+      callback(error);
+      return;
+    }
+    // If no error, delete by splice
+    data.sightings.splice(id - 1, 1);
     if (callback) {
       callback(data);
     }

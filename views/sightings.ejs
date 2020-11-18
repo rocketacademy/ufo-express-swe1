@@ -68,13 +68,14 @@
             <th scope="col" class="align-middle">Summary</th>
             <th scope="col" class="align-middle">Timestamp</th>
             <th scope="col" class="align-middle">Actions</th>
-
           </tr>
         </thead>
   
       <tbody>
+        <!--For each sighting in sightings array...-->
       <% sightings.forEach((sighting)=>{ %>
       <tr>
+        <!--For each key-value pair in each sighting object, print their relevant values-->
         <%Object.entries(sighting).forEach(([key,value])=>{ %> <% if(key
         ==="date_time"){ %>
         <td scope="col" class="align-middle"><%=value%></td>
