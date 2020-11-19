@@ -1,4 +1,7 @@
+import moment from 'moment';
 import { add, read, write } from './jsonFileStorage.js';
+
+moment().format();
 
 const FILE_NAME = 'data.json';
 const DATA_KEY = 'sightings';
@@ -7,17 +10,27 @@ const sightingsHeaderKeys = ['city', 'state', 'shape', 'duration', 'date_time', 
 // Non-export Functions
 
 const validateInputDataForUpdate = (singleSightingInputData) => {
+  let returnVal = true;
   sightingsHeaderKeys.forEach((key) => {
+    console.log(`Key: ${key}.`);
+    console.log((key in singleSightingInputData));
     if (!(key in singleSightingInputData))
     {
-      return false;
+      console.log(`Key: ${key} not found.`);
+      returnVal = false;
+      return returnVal;
     }
+    console.log(singleSightingInputData[key]);
     if (singleSightingInputData[key] === undefined || singleSightingInputData[key].length === 0)
     {
-      return false;
+      console.log(`singleSightingInputData[key]: ${singleSightingInputData[key]}`);
+      returnVal = false;
+      return returnVal;
     }
-    return true;
+    console.log('validation success');
+    returnVal = true;
   });
+  return returnVal;
 };
 
 /**
@@ -54,7 +67,19 @@ const sendResponseSingleSighting = (requestedIndex, jsonObjectData, error, respo
     response.status(500).send('Sorry, this didnt work!!');
     return;
   }
-  response.render('singleSighting', { selectedSight: jsonObjectData.sightings[requestedIndex] });
+  const responseSighting = { selectedSight: jsonObjectData.sightings[requestedIndex] };
+  // Format the last created and updated time interms of moment library
+  if ('updated_date' in responseSighting.selectedSight)
+  {
+    const [date, month, year] = responseSighting.selectedSight.updated_date.split('/');
+    responseSighting.selectedSight.updated_date += `  (${moment([year, month, date]).fromNow()})`;
+  }
+  if ('created_date' in responseSighting.selectedSight)
+  {
+    const [date, month, year] = responseSighting.selectedSight.created_date.split('/');
+    responseSighting.selectedSight.created_date += `  (${moment([year, month, date]).fromNow()})`;
+  }
+  response.render('singleSighting', responseSighting);
 };
 
 /**
@@ -177,11 +202,26 @@ const sendResponseAfterEditingData = (request, jsonObjectData, error, response) 
     response.status(500).send('Sorry, this didnt work!!');
     return;
   }
-  const createdDT = getSightingUpdateDateAndTime();
-  request.body.created_date = createdDT.Date;
-  request.body.created_time = createdDT.Time;
+  const updatedDT = getSightingUpdateDateAndTime();
+  request.body.updated_date = updatedDT.Date;
+  request.body.updated_time = updatedDT.Time;
+
+  console.log(request.body);
+
+  // Validate the input data received in the request
+  if (!validateInputDataForUpdate(request.body))
+  {
+    sendResponseAfterAddingData(null, 'Input validation failed. Ensure all values are filled.', response);
+    return;
+  }
+
+  console.log('Continuing with write');
 
   const requestedIndex = request.params.index;
+  // The data along with edit request will not have the created date and time.
+  // So, take it from the file data for later use
+  request.body.created_date = jsonObjectData.sightings[requestedIndex].created_date;
+  request.body.created_time = jsonObjectData.sightings[requestedIndex].created_time;
   jsonObjectData.sightings[requestedIndex] = request.body;
   write(FILE_NAME, jsonObjectData, (returnData, errorWrite) => {
     if (errorWrite)
@@ -350,12 +390,7 @@ export const handleEditDataFormDisplayReq = (request, response) => {
 // app.put('/sighting/:index/edit', handleEditDataPutReq);
 export const handleEditDataPutReq = (request, response) => {
   console.log(`Inside handleEditDataPutReq. URL: ${request.url} `);
-  // Validate the input data received in the request
-  if (!validateInputDataForUpdate(request.body))
-  {
-    sendResponseAfterAddingData(null, 'Input validation failed. Ensure all values are filled.', response);
-    return;
-  }
+
   // Read the file and update the sighting at the specified index
   read(FILE_NAME, (jsonObjectData, error) => {
     sendResponseAfterEditingData(request, jsonObjectData, error, response);
