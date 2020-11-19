@@ -1,3 +1,5 @@
+/** @format */
+
 .navTopMargin {
   margin-top: 60px;
 }
@@ -37,7 +39,12 @@
   background-color: silver;
 }
 
-.form-group.required .control-label:after{
+.form-group.required .control-label:after {
   content: "*";
-  color:red;
+  color: red;
+}
+
+.visitCount {
+  font-size: 30px;
+  border
 }

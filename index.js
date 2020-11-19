@@ -1,12 +1,16 @@
 import methodOverride from 'method-override';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import {
   read, add, deleteContent, edit,
 } from './jsonFileStorage.js';
 
+// Global set up of relevant apps
 const app = express();
 const PORT = 3000;
 const FILENAME = 'data.json';
+
+// Global tracker of number of visitors;
 
 // Set view engine to EJS
 app.set('view engine', 'ejs');
@@ -16,23 +20,15 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 // Middleware that allows POST methods to be overriden to perform PUT and DELETE requests
 app.use(methodOverride('_method'));
+// Middleware that allows cookies to be captured;
+app.use(cookieParser());
 
-// Helper Function that converts request.body to an Iterable Obj
-const convertToIterableObj = (nonIterableObj) => {
-  const newObj = {};
-  // Convert request.body into an iterable object
-  Object.entries(nonIterableObj).forEach(([key, value]) => {
-    newObj[key] = value;
-  });
-  return newObj;
-};
-
-// Helper Function that checks the inputs for validation
+// Function that checks the inputs for validation
 const performValidationOnRequestBody = (requestBodyObj, callback) => {
   const inputValidationFeedbackObj = {};
   let isFormValid = true;
   const {
-    _, description, date_time, city, state, shape, duration, summary, __,
+    description, shape,
   } = requestBodyObj;
 
   if (description.length < 5) {
@@ -51,6 +47,13 @@ const performValidationOnRequestBody = (requestBodyObj, callback) => {
   callback(inputValidationFeedbackObj, isFormValid);
 };
 
+// Function that sets a time for cookies
+const setExpiryForCookies = () => {
+  let date = new Date(Date.now() + 86400e3);
+  date = date.toUTCString();
+  return date;
+};
+
 // Route: Homepage - Shows all sightings, sortable by ID
 app.get('/', (request, response) => {
   const orderOfSort = request.query.sortOrder;
@@ -59,6 +62,23 @@ app.get('/', (request, response) => {
       response.sendStatus(500, error);
       return;
     }
+
+    // Implement cookies that tracks number of visits
+    // response.clearCookie('visits');
+    let visits = Number(request.cookies.visits);
+    // Fn returns true if value is not a number
+    if (!Number.isNaN(visits)) {
+      visits += 1;
+      response.cookie('visits', visits);
+      response.cookie('expires', setExpiryForCookies());
+    } else {
+      visits = 1;
+      response.cookie('visits', 1);
+      response.cookie('expires', setExpiryForCookies());
+    }
+    data.visits = visits;
+
+    // Sort by url query params
     data.sightings.sort((a, b) => {
       if (orderOfSort === 'ascending') {
         return a.id - b.id;
@@ -84,12 +104,11 @@ app.get('/newSighting', (request, response) => {
 
 // Create a POST method / request to submit new sighting
 app.post('/newSighting', (request, response) => {
-  const requestBodyObj = convertToIterableObj(request.body);
   // locally scoped boolean to track if current form is valid
   let isThisFormValid = true;
 
   // Perform input validation first
-  performValidationOnRequestBody(requestBodyObj, (feedbackMsg, areFieldsValid) => {
+  performValidationOnRequestBody(request.body, (feedbackMsg, areFieldsValid) => {
     if (areFieldsValid === false) {
       request.body.feedback = feedbackMsg;
       isThisFormValid = false;
@@ -103,10 +122,10 @@ app.post('/newSighting', (request, response) => {
   /**
    * @param {FILENAME} contains all the data of the sightings to be read
    * @param {key} the key to access in the file to be added
-   * @param {input} in this case, it is the iterated requestBodyObj
+   * @param {input} takes in request.body
    * @param {callback} performs a callback after taking in the data and error vars from add fn
   */
-  add(FILENAME, 'sightings', requestBodyObj, (data, error) => {
+  add(FILENAME, 'sightings', request.body, (data, error) => {
     // to be redirected to sighting/<index>
     response.redirect(`/sighting/${data.sightings.length}`);
   });
@@ -136,13 +155,12 @@ app.get('/sighting/:id/edit', (request, response) => {
 app.put('/sighting/:id/edit', (request, response) => {
   // id of sighting is not zero-indexed
   const { id } = request.params;
-  const requestBodyObj = convertToIterableObj(request.body);
 
   // locally scoped boolean to track if current form is valid
   let isThisFormValid = true;
 
   // Perform input validation first
-  performValidationOnRequestBody(requestBodyObj, (feedbackMsg, areFieldsValid) => {
+  performValidationOnRequestBody(request.body, (feedbackMsg, areFieldsValid) => {
     if (areFieldsValid === false) {
       // Assigning feedback & id from helper function into request.body
       request.body.feedback = feedbackMsg;
@@ -159,10 +177,10 @@ app.put('/sighting/:id/edit', (request, response) => {
   /**
  * @param {FILENAME} some file to be read
  * @param {id} the corresponding id of the sighting
- * @param {input} in this case, it is the iteratable requestBodyObj
+ * @param {input} takes in request.body
  * @param {callback} performs a callback after taking in the data and error vars from add fn
 */
-  edit(FILENAME, id, requestBodyObj, (data, error) => {
+  edit(FILENAME, id, request.body, (data, error) => {
     if (error) {
       response.sendStatus(500, 'error');
       return;
