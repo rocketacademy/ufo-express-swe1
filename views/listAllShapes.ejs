@@ -17,16 +17,17 @@
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
+    <%- include('navbar'); -%>
     <div class="container">
-      <h4>Shapes List</h4>
+      <h4 class="h4 text-center mt-4 mb-4">Shapes List</h4>
       <div class="row">
-        <div class="col-md-4 col-sm-12">
-          <ul>
-            <% for(const shapeName in shapesList) {%>
-            <li><a href="/shapes/<%=shapeName%>"><%=shapeName%></a></li>
-            <%}%>
-          </ul>
+        <% for(const shapeName in shapesList) {%>
+        <div
+          class="col-sm-12 text-center justify-content-center mb-3 shrink-to-fit"
+        >
+          <a class="rounded" href="/shapes/<%=shapeName%>"><%=shapeName%></a>
         </div>
+        <%}%>
       </div>
     </div>
 

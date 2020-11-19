@@ -17,8 +17,11 @@
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
+    <%- include('navbar'); -%>
     <div class="container grid-table">
-      <h4>Sightings with Shape: <%=requestedShapeName%></h4>
+      <h4 class="h4 text-center mt-4 mb-4">
+        Sightings with <em><%=requestedShapeName%></em> Shape
+      </h4>
       <div class="row font-weight-bold text-center sight-thead">
         <div class="col-sm-1 border">#</div>
         <div class="col-sm-11 border">

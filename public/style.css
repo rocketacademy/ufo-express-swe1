@@ -8,6 +8,24 @@ body {
   color: lightblue;
 }
 
+.nav-color {
+  background-color: rgb(33, 33, 51);
+  color: lightblue;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+a:hover {
+  /* background-color: rgb(55, 169, 189); */
+  color: aliceblue;
+  font-weight: 500;
+  font-size: 2em;
+  text-decoration: none;
+  border-radius: 0.5rem;
+}
+
 .sight-thead {
   background-color: rgb(6, 55, 83);
   color: lightcyan;
