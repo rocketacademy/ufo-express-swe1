@@ -43,6 +43,13 @@ const sendResponseSingleSighting = (requestedIndex, jsonObjectData, error, respo
   response.render('singleSighting', { selectedSight: jsonObjectData.sightings[requestedIndex] });
 };
 
+/**
+ *
+ * @param {*} request - HTTP request object
+ * @param {*} listOfSightings - list of sightings read from the file and to be sorted
+ *
+ * This function does the sorting as per the query specified in the request
+ */
 const sortSightingsList = (request, listOfSightings) => {
   // Check for query in the request
   console.log('Query received: ', request.query);
@@ -82,6 +89,13 @@ const sendResponseListAllSightings = (request, listOfSightings, error, response)
     response.status(500).send('Sorry, this didnt work!!');
     return;
   }
+  // Store the index also in the sighting array.
+  // This is to identify the correct item while deleting
+  // an element from the sorted list
+  listOfSightings.forEach((singleElement, index) => {
+    singleElement.index = index;
+  });
+
   let sortedListOfSightings = listOfSightings;
   if (Object.keys(request.query).length !== 0)
   {
@@ -118,6 +132,23 @@ const sendResponseDisplayEditForm = (requestedIndex, jsonObjectData, error, resp
 };
 
 /**
+ * This function gets the current locale date and time
+ */
+const getSightingUpdateDateAndTime = () => {
+  const currentDate = new Date();
+  const date = currentDate.getDate();
+  const month = currentDate.getMonth();
+  const year = currentDate.getFullYear();
+  const updatedDate = `${date}/${month}/${year}`;
+  const [hour, minute, second] = new Date().toLocaleTimeString('en-US').split(/:| /);
+  const updatedTime = `${hour}:${minute}:${second}`;
+  return {
+    Date: updatedDate,
+    Time: updatedTime,
+  };
+};
+
+/**
  *
  * @param {*} request - HTTP request
  * @param {*} jsonObjectData - file data read, in json object format
@@ -132,6 +163,10 @@ const sendResponseAfterEditingData = (request, jsonObjectData, error, response) 
     response.status(500).send('Sorry, this didnt work!!');
     return;
   }
+  const createdDT = getSightingUpdateDateAndTime();
+  request.body.created_date = createdDT.Date;
+  request.body.created_time = createdDT.Time;
+
   const requestedIndex = request.params.index;
   jsonObjectData.sightings[requestedIndex] = request.body;
   write(FILE_NAME, jsonObjectData, (returnData, errorWrite) => {
@@ -144,6 +179,7 @@ const sendResponseAfterEditingData = (request, jsonObjectData, error, response) 
   });
 };
 
+// This function sends response after deleting a data
 const sendResponseAfterDeletingData = (requestedIndex, jsonObjectData, error, response) => {
   if (error)
   {
@@ -199,7 +235,7 @@ const sendResponseAfterDisplaySightingsByShape = (requestedShape, jsonObjectData
   }
   const sightingsListByShape = [];
   jsonObjectData.sightings.forEach((singleSighting, index) => {
-    if (singleSighting.shape === requestedShape)
+    if (singleSighting.shape.trim() === requestedShape)
     {
       singleSighting.index = index;
       sightingsListByShape.push(singleSighting);
@@ -242,6 +278,14 @@ export const handleNewDataFormDisplayReq = (request, response) => {
 export const handleAddNewSightingReq = (request, response) => {
   // add an element to the array
   // Then call the function to send the response to client
+  // Add the current date and time also with the data
+  const createdDT = getSightingUpdateDateAndTime();
+  request.body.created_date = createdDT.Date;
+  request.body.created_time = createdDT.Time;
+
+  console.log(request.body.created_date);
+  console.log(request.body.created_time);
+
   add(FILE_NAME, DATA_KEY, request.body, (result, error) => {
     sendResponseAfterAddingData(result, error, response); });
 };

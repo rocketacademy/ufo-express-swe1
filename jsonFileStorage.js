@@ -37,6 +37,8 @@ export function add(filename, key, input, callback) {
       return;
     }
 
+    console.log('input in Add: ', input);
+
     // parse the string into a JavaScript object
     const jsonObjectData = JSON.parse(jsonFileData);
     if (jsonObjectData[key]) {

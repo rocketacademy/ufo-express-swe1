@@ -55,19 +55,23 @@
             <td><%=singleSighting[headerVal]%></td>
             <% } %> <%}) %>
             <td class="btn-col">
-              <form class="btn-form" action="/sighting/<%=index%>" method="GET">
+              <form
+                class="btn-form"
+                action="/sighting/<%=singleSighting.index%>"
+                method="GET"
+              >
                 <button class="btn view-btn btn-sm">View</button>
               </form>
               <form
                 class="btn-form"
-                action="/sighting/<%=index%>/edit"
+                action="/sighting/<%=singleSighting.index%>/edit"
                 method="GET"
               >
                 <button class="btn btn-sm edit-btn">Edit</button>
               </form>
               <form
                 class="btn-form"
-                action="/sighting/<%=index%>/delete?_method=DELETE"
+                action="/sighting/<%=singleSighting.index%>/delete?_method=DELETE"
                 method="POST"
               >
                 <button class="btn btn-sm delete-btn">Delete</button>
