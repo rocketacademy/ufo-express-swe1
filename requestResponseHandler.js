@@ -6,6 +6,20 @@ const sightingsHeaderKeys = ['city', 'state', 'shape', 'duration', 'date_time', 
 
 // Non-export Functions
 
+const validateInputDataForUpdate = (singleSightingInputData) => {
+  sightingsHeaderKeys.forEach((key) => {
+    if (!(key in singleSightingInputData))
+    {
+      return false;
+    }
+    if (singleSightingInputData[key] === undefined || singleSightingInputData[key].length === 0)
+    {
+      return false;
+    }
+    return true;
+  });
+};
+
 /**
  *
  * @param {*} result - the data received after the read & write function from jsonFileStorage add().
@@ -19,7 +33,7 @@ const sightingsHeaderKeys = ['city', 'state', 'shape', 'duration', 'date_time', 
 const sendResponseAfterAddingData = (result, error, response) => {
   if (error)
   {
-    response.status(500).send('Sorry, this didnt work!!');
+    response.status(500).send(`Sorry, this didnt work!! ${error}`);
     return;
   }
   const newItemIndex = result - 1;
@@ -276,6 +290,12 @@ export const handleNewDataFormDisplayReq = (request, response) => {
  * Function that processes the POST request for adding new sighting
  */
 export const handleAddNewSightingReq = (request, response) => {
+  // Validate the input data received in the request
+  if (!validateInputDataForUpdate(request.body))
+  {
+    sendResponseAfterAddingData(null, 'Input validation failed. Ensure all values are filled.', response);
+    return;
+  }
   // add an element to the array
   // Then call the function to send the response to client
   // Add the current date and time also with the data
@@ -330,6 +350,12 @@ export const handleEditDataFormDisplayReq = (request, response) => {
 // app.put('/sighting/:index/edit', handleEditDataPutReq);
 export const handleEditDataPutReq = (request, response) => {
   console.log(`Inside handleEditDataPutReq. URL: ${request.url} `);
+  // Validate the input data received in the request
+  if (!validateInputDataForUpdate(request.body))
+  {
+    sendResponseAfterAddingData(null, 'Input validation failed. Ensure all values are filled.', response);
+    return;
+  }
   // Read the file and update the sighting at the specified index
   read(FILE_NAME, (jsonObjectData, error) => {
     sendResponseAfterEditingData(request, jsonObjectData, error, response);
