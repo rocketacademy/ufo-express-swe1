@@ -64,51 +64,57 @@ app.get('/', (request, response) => {
       return;
     }
     // ***** Handles favorites - management *****/
+    // To populate all the state of the favorites button in the main page frpom the cookies
+    // if favoriteSightingId exists, it means that the cookie has at least initialized `favoriting`
+    if (request.cookies.favoriteSightingId) {
+      // First destructure request.cookies since it exists now
+      const { favoriteSightingId: existingfavoriteSightingIdArray } = request.cookies;
+      // Second, "reduce" the current iteration of data.sightings[index].hearts with data from cookies
+      data.sightings.forEach((sighting) => {
+        // default value is no
+        sighting.favorite = 'no';
+        // but if it matches an id in the cookie, then we change it to yes
+        existingfavoriteSightingIdArray.forEach((favoriteSightingId) => {
+          if (favoriteSightingId === sighting.id) {
+            sighting.favorite = 'yes';
+          }
+        });
+      });
+    }
 
     // If request.query.heart is defined (i.e heart has been clicked)
     if (request.query.heart) {
       const { heart: heartId } = request.query;
-      console.log(request.cookies, 'request cookies - 1');
+
       // if request cookie is undefined
       // it does not contain a field on favoriteSightingId -> means this is the first favorite
       if (!request.cookies.favoriteSightingId) {
         const newArrayOfFavoriteSightingId = [];
         newArrayOfFavoriteSightingId.push(Number(heartId));
         response.cookie('favoriteSightingId', newArrayOfFavoriteSightingId);
-        console.log(request.cookies, 'request cookies- 2');
+
         data.sightings[heartId - 1].favorite = 'yes';
         // otherwise the favoriteSightingId field exists (at least 1 heart)
       } else {
         // First destructure request.cookies since it exists now
         const { favoriteSightingId: existingfavoriteSightingIdArray } = request.cookies;
-        // Second, "reduce" the current iteration of data.sightings[index].hearts with data from cookies
-        data.sightings.forEach((sighting) => {
-          // default value is no
-          sighting.favorite = 'no';
-          // but if it matches an id in the cookie, then we change it to yes
-          existingfavoriteSightingIdArray.forEach((favoriteSightingId) => {
-            if (favoriteSightingId === sighting.id) {
-              sighting.favorite = 'yes';
-            }
-          });
-        });
-        console.log(data.sightings, 'data favorites');
+
         // Third if the current heart is already correspond
         // to something inside the favoriteSightingId field
         // if it doesnt, push it in
         if (existingfavoriteSightingIdArray.indexOf(Number(heartId)) === -1) {
           existingfavoriteSightingIdArray.push(Number(heartId));
           response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
-          console.log(request.cookies, 'request cookies -3 ');
-          // write to data.json file
+
+          // edit current instance of data.sightings w/o writing to data.json
           data.sightings[heartId - 1].favorite = 'yes';
         } else {
         // if it sightingid already exists, then we remove it
           existingfavoriteSightingIdArray.splice(existingfavoriteSightingIdArray
             .indexOf(Number(heartId)), 1);
           response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
-          console.log(request.cookies, 'request cookies -4 ');
-          // write to data.json file
+
+          // edit current instance of data.sightings w/o writing to data.json
           data.sightings[heartId - 1].favorite = 'no';
         }
       }
