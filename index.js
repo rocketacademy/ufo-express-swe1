@@ -1,6 +1,7 @@
 import methodOverride from 'method-override';
 import express from 'express';
 import cookieParser from 'cookie-parser';
+
 import {
   read, add, deleteContent, edit,
 } from './jsonFileStorage.js';
@@ -53,11 +54,51 @@ const setExpiryForCookies = () => {
   date = date.toUTCString();
   return date;
 };
+// Function that manages 'favorites' and related 'cookies'
+const updateFavoritesViaCookies = (heartsQueryString, callback) => {
+};
 
 // Route: Homepage - Shows all sightings, sortable by ID
 app.get('/', (request, response) => {
-  const orderOfSort = request.query.sortOrder;
   read(FILENAME, (data, error) => {
+    //* **** Handles favorites - management *****/
+  // If request.query.heart is defined (i.e heart has been clicked)
+    if (request.query.heart) {
+      console.log(request.cookies, 'request cookies - 1');
+      // if request cookie is undefined
+      // it does not contain a field on favoriteSightingId -> means this is the first favorite
+      if (!request.cookies.favoriteSightingId) {
+        const newArrayOfFavoriteSightingId = [];
+        newArrayOfFavoriteSightingId.push(Number(request.query.heart));
+        response.cookie('favoriteSightingId', newArrayOfFavoriteSightingId);
+        response.redirect('/');
+        console.log(request.cookies, 'request cookies- 2');
+        return;
+      // otherwise the favoriteSightingId field exists (at least 1 heart)
+      }
+
+      if (request.cookies.favoriteSightingId) {
+        const { favoriteSightingId: existingfavoriteSightingIdArray } = request.cookies;
+        // check if the current heart is already correspond to something inside the favoriteSightingId field
+        // if it doesnt, push it in
+        if (existingfavoriteSightingIdArray.indexOf(Number(request.query.heart)) === -1) {
+          existingfavoriteSightingIdArray.push(Number(request.query.heart));
+          response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
+          response.redirect('/');
+          console.log(request.cookies, 'request cookies -3 ');
+          return;
+        }
+        // if it sightingid already exists, then we remove it
+        existingfavoriteSightingIdArray.splice(existingfavoriteSightingIdArray.indexOf(Number(request.query.heart)), 1);
+        response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
+        response.redirect('/');
+        console.log(request.cookies, 'request cookies -4 ');
+        return;
+      }
+    }
+
+    //* **** Handles sort query *****/
+    const orderOfSort = request.query.sortOrder;
     if (error) {
       response.sendStatus(500, error);
       return;
@@ -207,6 +248,19 @@ app.get('/shapes/:shape', (request, response) => {
     // into an sightings key/variable within selectedShapeSightings obj
     selectedShapeSightings.sightings = data.sightings.filter((sighting) => sighting.shape === selectedShape);
     response.render('shape', selectedShapeSightings);
+  });
+});
+
+// Render all favorited sightings
+app.get('/favorites', (request, response) => {
+  read(FILENAME, (data) => {
+    // Retrieve array of favorite sightings from cookies
+    const { favoriteSightingId: arrayOfIds } = request.cookies;
+    console.log(arrayOfIds, 'test');
+    const favoriteSightings = {};
+    favoriteSightings.sightings = data.sightings.filter((sighting) => arrayOfIds.indexOf(sighting.id) !== -1);
+
+    response.render('favoriteSightings', favoriteSightings);
   });
 });
 
