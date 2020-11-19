@@ -41,18 +41,38 @@ body {
   color: aliceblue;
   font-size: 0.74rem;
   line-height: 1;
+  margin: 0px;
 }
 
 .view-btn {
-  background-color: rgb(75, 101, 117);
-  color: aliceblue;
-  font-size: 0.74rem;
-}
-
-.edit-btn {
   background-color: rgb(119, 153, 175);
   color: aliceblue;
   font-size: 0.74rem;
+  line-height: 1;
+  margin: 0px;
+}
+
+.edit-btn {
+  background-color: rgb(75, 101, 117);
+  color: aliceblue;
+  font-size: 0.74rem;
+  line-height: 1;
+  margin: 0px;
+}
+
+/*Alternate row coloring of a bootstrap grid*/
+.grid-table .grid-table-row:nth-of-type(odd) {
+  background-color: rgb(34, 122, 174);
+  color: aliceblue;
+}
+.grid-table .grid-table-row:nth-of-type(even) {
+  background-color: rgb(76, 143, 182);
+  color: aliceblue;
+}
+/*Hovering over a grid row*/
+.grid-table .grid-table-row:hover {
+  background-color: rgb(55, 169, 189);
+  color: midnightblue;
 }
 
 /*This is to adjust the cell width to the content*/

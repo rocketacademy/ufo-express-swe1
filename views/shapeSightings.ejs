@@ -17,24 +17,38 @@
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <div class="container">
-      <h4>Sightings with Shape: <%=requestedShapeName%></h4>     
-      <div class="row">
-        <% sightingsList.forEach((singleSighting, index) =>{%>
+    <div class="container grid-table">
+      <h4>Sightings with Shape: <%=requestedShapeName%></h4>
+      <div class="row font-weight-bold text-center">
+        <div class="col-1 border">#</div>
+        <div class="col-11 border">
+          <div class="row">
+            <div class="col-2 border-right">Data</div>
+            <div class="col-9">Content</div>
+          </div>
+        </div>
+      </div>
+      <% sightingsList.forEach((singleSighting, index) =>{%>
+      <div class="row grid-table-row">
         <!--Serial number-->
-        <div class="col-1 border"><%= index + 1%></div>
+        <div class="col-1 border font-weight-light"><%= index + 1%></div>
         <!--Column for keys and values. Each key-value pair will be in a row-->
         <div class="col-11">
           <% sightingsHeader.forEach((headerVal) =>{%>
           <div class="row">
             <!--Key-->
-            <div class="col-2 border"><em><%=headerVal%></em></div>
+            <div class="col-2 border">
+              <em><%=headerVal%></em>
+            </div>
             <!--Values-->
-            <div class="col border" style="text-overflow: ellipsis;"><%=singleSighting[headerVal]%></div>
+            <div class="col border" style="text-overflow: ellipsis">
+              <%=singleSighting[headerVal]%>
+            </div>
           </div>
           <%}) %>
         </div>
-        <% }) %>
+      </div>
+      <% }) %>
     </div>
 
     <!--Bootstrap scripts-->
