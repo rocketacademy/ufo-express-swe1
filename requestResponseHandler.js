@@ -29,6 +29,7 @@ const validateInputDataForUpdate = (singleSightingInputData) => {
     }
     console.log('validation success');
     returnVal = true;
+    return returnVal;
   });
   return returnVal;
 };
