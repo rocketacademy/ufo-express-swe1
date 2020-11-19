@@ -3,15 +3,13 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 
 import {
-  read, add, deleteContent, edit,
+  read, add, deleteContent, edit, write,
 } from './jsonFileStorage.js';
 
 // Global set up of relevant apps
 const app = express();
 const PORT = 3000;
 const FILENAME = 'data.json';
-
-// Global tracker of number of visitors;
 
 // Set view engine to EJS
 app.set('view engine', 'ejs');
@@ -61,49 +59,58 @@ const updateFavoritesViaCookies = (heartsQueryString, callback) => {
 // Route: Homepage - Shows all sightings, sortable by ID
 app.get('/', (request, response) => {
   read(FILENAME, (data, error) => {
-    //* **** Handles favorites - management *****/
-  // If request.query.heart is defined (i.e heart has been clicked)
+    if (error) {
+      response.sendStatus(500, error);
+      return;
+    }
+    // ***** Handles favorites - management *****/
+    // If request.query.heart is defined (i.e heart has been clicked)
     if (request.query.heart) {
+      const { heart: heartId } = request.query;
       console.log(request.cookies, 'request cookies - 1');
       // if request cookie is undefined
       // it does not contain a field on favoriteSightingId -> means this is the first favorite
       if (!request.cookies.favoriteSightingId) {
         const newArrayOfFavoriteSightingId = [];
-        newArrayOfFavoriteSightingId.push(Number(request.query.heart));
+        newArrayOfFavoriteSightingId.push(Number(heartId));
         response.cookie('favoriteSightingId', newArrayOfFavoriteSightingId);
         response.redirect('/');
         console.log(request.cookies, 'request cookies- 2');
+        data.sightings[heartId - 1].favorite = 'yes';
+        write(FILENAME, data);
         return;
       // otherwise the favoriteSightingId field exists (at least 1 heart)
       }
 
       if (request.cookies.favoriteSightingId) {
         const { favoriteSightingId: existingfavoriteSightingIdArray } = request.cookies;
-        // check if the current heart is already correspond to something inside the favoriteSightingId field
+        // check if the current heart is already correspond
+        // to something inside the favoriteSightingId field
         // if it doesnt, push it in
-        if (existingfavoriteSightingIdArray.indexOf(Number(request.query.heart)) === -1) {
-          existingfavoriteSightingIdArray.push(Number(request.query.heart));
+        if (existingfavoriteSightingIdArray.indexOf(Number(heartId)) === -1) {
+          existingfavoriteSightingIdArray.push(Number(heartId));
           response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
           response.redirect('/');
           console.log(request.cookies, 'request cookies -3 ');
+          // write to data.json file
+          data.sightings[heartId - 1].favorite = 'yes';
+          write(FILENAME, data);
           return;
         }
         // if it sightingid already exists, then we remove it
-        existingfavoriteSightingIdArray.splice(existingfavoriteSightingIdArray.indexOf(Number(request.query.heart)), 1);
+        existingfavoriteSightingIdArray.splice(existingfavoriteSightingIdArray
+          .indexOf(Number(heartId)), 1);
         response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
         response.redirect('/');
         console.log(request.cookies, 'request cookies -4 ');
+        // write to data.json file
+        data.sightings[heartId - 1].favorite = 'no';
+        write(FILENAME, data);
         return;
       }
     }
 
-    //* **** Handles sort query *****/
-    const orderOfSort = request.query.sortOrder;
-    if (error) {
-      response.sendStatus(500, error);
-      return;
-    }
-
+    //* **** Handles visitors count *****/
     // Implement cookies that tracks number of visits
     // response.clearCookie('visits');
     let visits = Number(request.cookies.visits);
@@ -119,6 +126,8 @@ app.get('/', (request, response) => {
     }
     data.visits = visits;
 
+    //* **** Handles sort query *****/
+    const orderOfSort = request.query.sortOrder;
     // Sort by url query params
     data.sightings.sort((a, b) => {
       if (orderOfSort === 'ascending') {

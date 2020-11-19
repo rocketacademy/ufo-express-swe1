@@ -87,13 +87,17 @@
       <% sightings.forEach((sighting,index)=>{ %>
       <tr>
         <!--For each key-value pair in each sighting object, print their relevant values-->
-        <%Object.entries(sighting).forEach(([key,value])=>{ %> <% if(key
-        ==="date_time"){ %>
+        <%Object.entries(sighting).forEach(([key,value])=>{ %> 
+        <% if(key === "favorite") { %>
+        <% return %>
+        <% } else if(key ==="date_time"){ %>
         <td scope="col" class="align-middle"><%=value%></td>
         <% } else { %>
         <td scope="col" class="align-middle"><%=value%></td>
-        <% } %> <% }) %>
+        <% } %> 
+        <% }) %>
         <td>
+
         <a
           href="/sighting/<%=sighting.id%>"
           class="btn btn-info btn-md btnHeight"
@@ -119,7 +123,11 @@
         </td>
         <td class="align-middle">
           <a type='submit' href="/?heart=<%=index+1%>">
-          <i onclick="myFunction(this)" class="fa fa-heart-o"></i>
+          <% if(sighting.favorite === 'yes'){ %>
+          <i class="fa fa-heart"></i>
+          <% } else {%>
+          <i class="fa fa-heart-o"></i>
+          <% } %>
           </a>
         </td>
         
