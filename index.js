@@ -64,6 +64,7 @@ app.get('/', (request, response) => {
       return;
     }
     // ***** Handles favorites - management *****/
+
     // If request.query.heart is defined (i.e heart has been clicked)
     if (request.query.heart) {
       const { heart: heartId } = request.query;
@@ -74,39 +75,42 @@ app.get('/', (request, response) => {
         const newArrayOfFavoriteSightingId = [];
         newArrayOfFavoriteSightingId.push(Number(heartId));
         response.cookie('favoriteSightingId', newArrayOfFavoriteSightingId);
-        response.redirect('/');
         console.log(request.cookies, 'request cookies- 2');
         data.sightings[heartId - 1].favorite = 'yes';
-        write(FILENAME, data);
-        return;
-      // otherwise the favoriteSightingId field exists (at least 1 heart)
-      }
-
-      if (request.cookies.favoriteSightingId) {
+        // otherwise the favoriteSightingId field exists (at least 1 heart)
+      } else {
+        // First destructure request.cookies since it exists now
         const { favoriteSightingId: existingfavoriteSightingIdArray } = request.cookies;
-        // check if the current heart is already correspond
+        // Second, "reduce" the current iteration of data.sightings[index].hearts with data from cookies
+        data.sightings.forEach((sighting) => {
+          // default value is no
+          sighting.favorite = 'no';
+          // but if it matches an id in the cookie, then we change it to yes
+          existingfavoriteSightingIdArray.forEach((favoriteSightingId) => {
+            if (favoriteSightingId === sighting.id) {
+              sighting.favorite = 'yes';
+            }
+          });
+        });
+        console.log(data.sightings, 'data favorites');
+        // Third if the current heart is already correspond
         // to something inside the favoriteSightingId field
         // if it doesnt, push it in
         if (existingfavoriteSightingIdArray.indexOf(Number(heartId)) === -1) {
           existingfavoriteSightingIdArray.push(Number(heartId));
           response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
-          response.redirect('/');
           console.log(request.cookies, 'request cookies -3 ');
           // write to data.json file
           data.sightings[heartId - 1].favorite = 'yes';
-          write(FILENAME, data);
-          return;
-        }
+        } else {
         // if it sightingid already exists, then we remove it
-        existingfavoriteSightingIdArray.splice(existingfavoriteSightingIdArray
-          .indexOf(Number(heartId)), 1);
-        response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
-        response.redirect('/');
-        console.log(request.cookies, 'request cookies -4 ');
-        // write to data.json file
-        data.sightings[heartId - 1].favorite = 'no';
-        write(FILENAME, data);
-        return;
+          existingfavoriteSightingIdArray.splice(existingfavoriteSightingIdArray
+            .indexOf(Number(heartId)), 1);
+          response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
+          console.log(request.cookies, 'request cookies -4 ');
+          // write to data.json file
+          data.sightings[heartId - 1].favorite = 'no';
+        }
       }
     }
 
@@ -126,7 +130,7 @@ app.get('/', (request, response) => {
     }
     data.visits = visits;
 
-    //* **** Handles sort query *****/
+    // ***** Handles sort query *****/
     const orderOfSort = request.query.sortOrder;
     // Sort by url query params
     data.sightings.sort((a, b) => {
