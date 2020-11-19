@@ -1,5 +1,6 @@
 body {
-  background-color: midnightblue;
+  /* background-color: midnightblue; */
+  background-color: rgb(33, 33, 51);
   color: rgb(216, 238, 238);
 }
 
@@ -33,7 +34,12 @@ body {
 .table-hover tbody tr:hover td,
 .table-hover tbody tr:hover th {
   background-color: rgb(25, 163, 187);
-  color: midnightblue;
+  color: rgb(3, 3, 41);
+  font-weight: 500;
+}
+
+.btn-form {
+  margin-bottom: 1.5px;
 }
 
 .delete-btn {
@@ -72,7 +78,8 @@ body {
 /*Hovering over a grid row*/
 .grid-table .grid-table-row:hover {
   background-color: rgb(55, 169, 189);
-  color: midnightblue;
+  color: rgb(3, 3, 41);
+  font-weight: 500;
 }
 
 /*This is to adjust the cell width to the content*/
