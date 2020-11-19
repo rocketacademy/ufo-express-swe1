@@ -21,9 +21,9 @@
     <h4 class="h4 text-center mt-2 mb-3">Sighting Details</h4>
     <div class="container">
       <% for( const key in selectedSight) { %>
-      <div class="row justify-content-center border key-value-row">
-        <div class="col-sm-2 border-right key-val-col"><em><%=key%></em>:</div>
-        <div class="col-sm-8 key-val-col"><%= selectedSight[key] %></div>
+      <div class="row justify-content-center key-value-row">
+        <div class="col-sm-2 border key-val-col"><em><%=key%></em>:</div>
+        <div class="col-sm-8 border key-val-col"><%= selectedSight[key] %></div>
       </div>
       <% } %>
     </div>

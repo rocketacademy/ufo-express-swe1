@@ -43,6 +43,30 @@ const sendResponseSingleSighting = (requestedIndex, jsonObjectData, error, respo
   response.render('singleSighting', { selectedSight: jsonObjectData.sightings[requestedIndex] });
 };
 
+const sortSightingsList = (request, listOfSightings) => {
+  // Check for query in the request
+  console.log('Query received: ', request.query);
+  // Get the query Key value
+  const sortBy = Object.keys(request.query)[0];
+  console.log(sortBy);
+  const sortType = request.query[sortBy];
+  console.log(sortType);
+  // Sorting the filtered sightings array
+  listOfSightings.sort((first, second) => {
+    if (first[sortBy] < second[sortBy])
+    {
+      return ((sortType === 'asc') ? -1 : 1);
+    }
+    if (first[sortBy] > second[sortBy])
+    {
+      return ((sortType === 'asc') ? 1 : -1);
+    }
+    return 0;
+  });
+
+  return listOfSightings;
+};
+
 /**
  *
  * @param {*} listOfSightings
@@ -52,16 +76,22 @@ const sendResponseSingleSighting = (requestedIndex, jsonObjectData, error, respo
  * This function sends the response to the request to display all the sightings
  * in the data file
  */
-const sendResponseListAllSightings = (listOfSightings, error, response) => {
+const sendResponseListAllSightings = (request, listOfSightings, error, response) => {
   if (error)
   {
     response.status(500).send('Sorry, this didnt work!!');
     return;
   }
+  let sortedListOfSightings = listOfSightings;
+  if (Object.keys(request.query).length !== 0)
+  {
+    sortedListOfSightings = sortSightingsList(request, listOfSightings);
+  }
+
   // This variable stores the keys, which will be displayed as header
   response.render('allSightings', {
     sightingsHeader: sightingsHeaderKeys,
-    sightingsList: listOfSightings,
+    sightingsList: sortedListOfSightings,
   });
 };
 
@@ -240,7 +270,7 @@ export const handleSingleSightingDisplayReg = (request, response) => {
  */
 export const handleAllSightingsDisplayReq = (request, response) => {
   read(FILE_NAME, (jsonObjectData, error) => {
-    sendResponseListAllSightings(jsonObjectData.sightings, error, response);
+    sendResponseListAllSightings(request, jsonObjectData.sightings, error, response);
   });
 };
 

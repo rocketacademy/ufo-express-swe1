@@ -26,6 +26,30 @@ a:hover {
   border-radius: 0.5rem;
 }
 
+.header-dropdown {
+  position: relative;
+  display: flex;
+  z-index: 1;
+  padding: 0px;
+  justify-content: flex-end;
+  padding-right: 45px;
+}
+
+.dropdown-menu,
+.dropdown-item {
+  background-color: rgb(216, 211, 211);
+  border-radius: 0.52em;
+}
+
+.dropdown-item:hover {
+  background-color: rgb(40, 40, 41);
+  color: bisque;
+  /* font-weight: 500; */
+  font-size: 1.2em;
+  text-decoration: none;
+  border-radius: 0.5rem;
+}
+
 .sight-thead {
   background-color: rgb(6, 55, 83);
   color: lightcyan;
