@@ -3,7 +3,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 
 import {
-  read, add, deleteContent, edit, write,
+  read, add, deleteContent, edit,
 } from './jsonFileStorage.js';
 
 // Global set up of relevant apps
@@ -52,8 +52,98 @@ const setExpiryForCookies = () => {
   date = date.toUTCString();
   return date;
 };
-// Function that manages 'favorites' and related 'cookies'
-const updateFavoritesViaCookies = (heartsQueryString, callback) => {
+// Function that populates the states of all favorites button in the root
+// page from (request) cookies
+const populateStateOfFavoritesBtns = (reqCookies, data) => {
+  // To populate all the state of the favorites button in the root page from the cookies
+  // if favoriteSightingId exists, it means that the cookie has at least initialized `favoriting`
+  if (reqCookies.favoriteSightingId) {
+    // First destructure request.cookies since it exists now
+    const { favoriteSightingId: existingfavoriteSightingIdArray } = reqCookies;
+    // Second, "reduce" the current iteration of data.sightings[index].hearts with data from cookies
+    data.sightings.forEach((sighting) => {
+      // default value is no
+      sighting.favorite = 'no';
+      // but if it matches an id in the cookie, then we change it to yes
+      existingfavoriteSightingIdArray.forEach((favoriteSightingId) => {
+        if (favoriteSightingId === sighting.id) {
+          sighting.favorite = 'yes';
+        }
+      });
+    });
+  }
+};
+
+// Function that checks if a fav btn is clicked and handles
+// the subsequent state/events of the favorite buttons
+const trackStateOfFavoritesBtns = (reqQuery, reqCookies, response, data) => {
+  // If request.query.heart is defined (i.e heart has been clicked)
+  if (reqQuery.heart) {
+    const { heart: heartId } = reqQuery;
+
+    // if request cookie is undefined
+    // it does not contain a field on favoriteSightingId -> means this is the first favorite
+    if (!reqCookies.favoriteSightingId) {
+      const newArrayOfFavoriteSightingId = [];
+      newArrayOfFavoriteSightingId.push(Number(heartId));
+      response.cookie('favoriteSightingId', newArrayOfFavoriteSightingId);
+
+      data.sightings[heartId - 1].favorite = 'yes';
+      // otherwise the favoriteSightingId field exists (at least 1 heart)
+    } else {
+      // First destructure request.cookies since it exists now
+      const { favoriteSightingId: existingfavoriteSightingIdArray } = reqCookies;
+
+      // Third if the current heart is already correspond
+      // to something inside the favoriteSightingId field
+      // if it doesnt, push it in
+      if (existingfavoriteSightingIdArray.indexOf(Number(heartId)) === -1) {
+        existingfavoriteSightingIdArray.push(Number(heartId));
+        response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
+
+        // edit current instance of data.sightings w/o writing to data.json
+        data.sightings[heartId - 1].favorite = 'yes';
+      } else {
+        // if it sightingid already exists, then we remove it
+        existingfavoriteSightingIdArray.splice(existingfavoriteSightingIdArray
+          .indexOf(Number(heartId)), 1);
+        response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
+
+        // edit current instance of data.sightings w/o writing to data.json
+        data.sightings[heartId - 1].favorite = 'no';
+      }
+    }
+  }
+};
+
+// Function that sorts the table of sightings in the main page
+const sortTableOfSightings = (reqQuery, data) => {
+  const orderOfSort = reqQuery.sortOrder;
+  // Sort by url query params
+  data.sightings.sort((a, b) => {
+    if (orderOfSort === 'ascending') {
+      return a.id - b.id;
+    } if (orderOfSort === 'descending') {
+      return b.id - a.id;
+    }
+    return a.id - b.id;
+  });
+};
+
+// Function that handles visitors count
+const trackVisitorsCount = (reqCookies, response, data) => {
+  let visits = Number(reqCookies.visits);
+  // Fn returns true if value is not a number
+  if (!Number.isNaN(visits)) {
+    visits += 1;
+    response.cookie('visits', visits);
+    response.cookie('expires', setExpiryForCookies());
+  } else {
+    visits = 1;
+    response.cookie('visits', 1);
+    response.cookie('expires', setExpiryForCookies());
+  }
+  data.visits = visits;
 };
 
 // Route: Homepage - Shows all sightings, sortable by ID
@@ -63,90 +153,17 @@ app.get('/', (request, response) => {
       response.sendStatus(500, error);
       return;
     }
-    // ***** Handles favorites - management *****/
-    // To populate all the state of the favorites button in the main page frpom the cookies
-    // if favoriteSightingId exists, it means that the cookie has at least initialized `favoriting`
-    if (request.cookies.favoriteSightingId) {
-      // First destructure request.cookies since it exists now
-      const { favoriteSightingId: existingfavoriteSightingIdArray } = request.cookies;
-      // Second, "reduce" the current iteration of data.sightings[index].hearts with data from cookies
-      data.sightings.forEach((sighting) => {
-        // default value is no
-        sighting.favorite = 'no';
-        // but if it matches an id in the cookie, then we change it to yes
-        existingfavoriteSightingIdArray.forEach((favoriteSightingId) => {
-          if (favoriteSightingId === sighting.id) {
-            sighting.favorite = 'yes';
-          }
-        });
-      });
-    }
+    // To populate all the state of the favorites button in the root page from the cookies
+    populateStateOfFavoritesBtns(request.cookies, data);
 
-    // If request.query.heart is defined (i.e heart has been clicked)
-    if (request.query.heart) {
-      const { heart: heartId } = request.query;
+    // To track the subsequent state and events of favoritebtns being pressed/unpressed
+    trackStateOfFavoritesBtns(request.query, request.cookies, response, data);
 
-      // if request cookie is undefined
-      // it does not contain a field on favoriteSightingId -> means this is the first favorite
-      if (!request.cookies.favoriteSightingId) {
-        const newArrayOfFavoriteSightingId = [];
-        newArrayOfFavoriteSightingId.push(Number(heartId));
-        response.cookie('favoriteSightingId', newArrayOfFavoriteSightingId);
+    // To track visitors count, everytime root page is refreshed
+    trackVisitorsCount(request.cookies, response, data);
 
-        data.sightings[heartId - 1].favorite = 'yes';
-        // otherwise the favoriteSightingId field exists (at least 1 heart)
-      } else {
-        // First destructure request.cookies since it exists now
-        const { favoriteSightingId: existingfavoriteSightingIdArray } = request.cookies;
-
-        // Third if the current heart is already correspond
-        // to something inside the favoriteSightingId field
-        // if it doesnt, push it in
-        if (existingfavoriteSightingIdArray.indexOf(Number(heartId)) === -1) {
-          existingfavoriteSightingIdArray.push(Number(heartId));
-          response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
-
-          // edit current instance of data.sightings w/o writing to data.json
-          data.sightings[heartId - 1].favorite = 'yes';
-        } else {
-        // if it sightingid already exists, then we remove it
-          existingfavoriteSightingIdArray.splice(existingfavoriteSightingIdArray
-            .indexOf(Number(heartId)), 1);
-          response.cookie('favoriteSightingId', existingfavoriteSightingIdArray);
-
-          // edit current instance of data.sightings w/o writing to data.json
-          data.sightings[heartId - 1].favorite = 'no';
-        }
-      }
-    }
-
-    //* **** Handles visitors count *****/
-    // Implement cookies that tracks number of visits
-    // response.clearCookie('visits');
-    let visits = Number(request.cookies.visits);
-    // Fn returns true if value is not a number
-    if (!Number.isNaN(visits)) {
-      visits += 1;
-      response.cookie('visits', visits);
-      response.cookie('expires', setExpiryForCookies());
-    } else {
-      visits = 1;
-      response.cookie('visits', 1);
-      response.cookie('expires', setExpiryForCookies());
-    }
-    data.visits = visits;
-
-    // ***** Handles sort query *****/
-    const orderOfSort = request.query.sortOrder;
-    // Sort by url query params
-    data.sightings.sort((a, b) => {
-      if (orderOfSort === 'ascending') {
-        return a.id - b.id;
-      } if (orderOfSort === 'descending') {
-        return b.id - a.id;
-      }
-      return a.id - b.id;
-    });
+    // To sort the table (without manipulating database) of sightings in root page
+    sortTableOfSightings(request.query, data);
     response.render('allSightings', data);
   });
 });
