@@ -281,6 +281,13 @@ const sendResponseAfterShapesListDisplay = (jsonObjectData, error, response) => 
   response.render('listAllShapes', { shapesList: uniqueShapeListObj });
 };
 
+/**
+ *
+ * @param {*} requestedShape - shape requested, of which the sightings will be displayed
+ * @param {*} jsonObjectData - json object for file data
+ * @param {*} error - error after reading file
+ * @param {*} response - HTTP response
+ */
 const sendResponseAfterDisplaySightingsByShape = (requestedShape, jsonObjectData,
   error, response) => {
   if (error)
