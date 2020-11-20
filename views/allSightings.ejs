@@ -33,13 +33,13 @@
           <tr >
             <th scope="col" class="align-middle">ID</th>
             <th scope="col" class="align-middle">Description</th>
-            <th scope="col" class="align-middle">Date & Time</th>
+            <th scope="col" class="align-middle hideOnResizeSmall">Date & Time</th>
             <th scope="col" class="align-middle">City</th>
             <th scope="col" class="align-middle">State</th>
             <th scope="col" class="align-middle">Shape</th>
-            <th scope="col" class="align-middle">Duration</th>
-            <th scope="col" class="align-middle">Summary</th>
-            <th scope="col" class="align-middle">Timestamp</th>
+            <th scope="col" class="align-middle hideOnResizeSmall">Duration</th>
+            <th scope="col" class="align-middle hideOnResizeMedium">Summary</th>
+            <th scope="col" class="align-middle hideOnResizeMedium">Timestamp</th>
             <th scope="col" class="align-middle">Actions</th>
             <th scope="col" class="align-middle"><i class="fa fa-heart "></i></th>
           </tr>
@@ -53,8 +53,14 @@
         <%Object.entries(sighting).forEach(([key,value])=>{ %> 
         <% if(key === "favorite") { %>
         <% return %>
-        <% } else if(key ==="date_time"){ %>
-        <td scope="col" class="align-middle"><%=value%></td>
+        <% } else if(key ==="date_time" || key ==="duration"){ %>
+        <td scope="col" class="align-middle hideOnResizeSmall"><%=value%></td>
+         <% } else if(key ==="summary"){ %>
+        <td scope="col" class="align-middle hideOnResizeMedium"><div class="hideWords"><%=value%></div></td>
+          <% } else if(key ==="timeSubmitted"){ %>
+        <td scope="col" class="align-middle hideOnResizeMedium"><%=value%></td>
+        <% } else if(key ==="description"){ %>
+        <td scope="col" class="align-middle "><div class="hideWords"><%=value%></div></td>
         <% } else { %>
         <td scope="col" class="align-middle"><%=value%></td>
         <% } %> 
