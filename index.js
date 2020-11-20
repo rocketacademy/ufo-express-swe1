@@ -8,7 +8,7 @@ import {
 
 // Global set up of relevant apps
 const app = express();
-const PORT = 3000;
+const PORT = 80;
 const FILENAME = 'data.json';
 
 // Set view engine to EJS
@@ -130,7 +130,7 @@ const sortTableOfSightings = (reqQuery, data) => {
   });
 };
 
-// Function that handles visitors count
+// Function that handles visitors count for the time website is live
 const trackVisitorsCount = (reqCookies, response, data) => {
   let visits = Number(reqCookies.visits);
   // Exit the function if a user visited this site before
