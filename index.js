@@ -8,7 +8,7 @@ import {
 
 // Global set up of relevant apps
 const app = express();
-const PORT = 80;
+const PORT = 3000;
 const FILENAME = 'data.json';
 
 // Set view engine to EJS
